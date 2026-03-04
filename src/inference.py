@@ -1,6 +1,8 @@
 from functions import sentiment_classifier
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from fastapi import FastAPI, status, Response
+
 
 local_distilbert = "./distilbert_model"
 
@@ -14,6 +16,18 @@ model = AutoModelForSequenceClassification.from_pretrained(
     dtype=torch.float16,
     attn_implementation="sdpa"
 )
+
+app = FastAPI()
+
+@app.get("/ping", status_code=status.HTTP_201_CREATED)
+def ping():
+    return "server online...!"
+
+
+@app.get("/invocation")
+def transformation():
+    x = 1
+
 
 text = ["YURRR", "Hello how are you?", "Wow this is so delish"]
 
