@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI, status
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from models.sentiment.core import process_inputs, sentiment_classifier, format_output
-from common.schemas import comments_all
+from common.schemas import payload
 from pathlib import Path
 
 local_distilbert = Path("models/sentiment/distilbert_model")
@@ -28,7 +28,7 @@ def ping():
 
 
 @app.post("/sentiment")
-def process_sentiment(input_payload: comments_all):
+def process_sentiment(input_payload: payload):
 
     inputs, ids = process_inputs(input_payload)
     outputs = sentiment_classifier(model, tokenizer, inputs, ids)
