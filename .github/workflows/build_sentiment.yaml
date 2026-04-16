@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ericcheung1/wpaas
+  IMAGE_NAME: ericcheung1/wpaas-sentiment
 
 jobs:
   build-and-push:
