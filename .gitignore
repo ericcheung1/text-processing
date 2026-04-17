@@ -5,3 +5,4 @@ test_strings.py
 __pycache__
 working_file.py
 test_payload.py
+venv*/
