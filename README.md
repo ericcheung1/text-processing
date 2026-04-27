@@ -1,22 +1,21 @@
 # Word processing-as-a-service - NLP Inference API
 
-A lightweight, production‑style REST API built with FastAPI for serving natural langauge processing (NLP) models for tasks such as sentiment analysis. The system and models are designed for deployment on CPU‑only, low‑memory environments such as a VPS with 1 GiB of memory. Emphasis of this project is placed on modularity, ease of deployment, and utilizing scalable patterns.
+A lightweight, production‑style REST API built with FastAPI for serving natural langauge processing (NLP) models for tasks such as sentiment analysis. The system and models are designed for deployment on constrained environments such as a VPS with 1 GiB of memory. Emphasis of this project is placed on modularity, ease of deployment, and utilizing scalable patterns.
 
-Each model/endpoint is isolated to build as its own container image, sharing a common Pydantic schema for consistent validation. This architecture enables easier deployment, easier extension to new NLP tasks, and minimal resource usage. Model weights are also included and stored with Git LFS to keep dependicies minimal.
+This project generalizes my earlier Canucks sentiment analysis work @ [github.com/ericcheung1/canucks-sentiment](https://github.com/ericcheung1/canucks-sentiment), turning from a single Flask app with hardcoded logic into a scalable, multi‑model inference service.
 
-This project generalizes my earlier Canucks sentiment analysis work @ [github.com/ericcheung1/canucks-sentiment](https://github.com/ericcheung1/canucks-sentiment), evolving from a single Flask app with hardcoded logic into a scalable, multi‑model inference service.
 
-### Features
+## Architectural Diagram
 
-- REST API for ML inference
-- Sentiment analysis endpoint
-- Modular file structure
-- Containerized with Docker
-- Model weights stored in Git LFS
+![Architecture](docs/wpaas-diagram.png)
+
+Each model/endpoint is isolated to build as its own container image, sharing a common Pydantic schema for consistent input validation. This structure hopes to enable easier deployment, easier extension to new NLP tasks, and minimal resource usage. Model weights are also included and stored with Git LFS to keep dependicies minimal.
 
 ## Example Request
 
-POST /sentiment
+### Sentiment
+
+- POST /sentiment
 
 ```
 Request: # Can also be sent without text_id field
@@ -24,11 +23,11 @@ Request: # Can also be sent without text_id field
 {
   "texts": [
     {
-      "text": "I love to eat nachos!",
+      "text": "I love eating nachos!",
       "text_id": "abc123"
     },
     {
-      "text": "I hate to eat nachos!",
+      "text": "I hate eating nachos!",
       "text_id": "def345"
     }
   ]
@@ -65,14 +64,19 @@ This repository uses Git LFS to store model weights.
 Make sure Git LFS is installed with `git lfs install` before cloning.
 
 #### With Source
-Clone the repo, from the project root, install dependencies with `pip install -r models/sentiment/requirements.txt`, activate venv, then start server with `uvicorn models.sentiment.main:app --host 0.0.0.0 --port 8000`.
+Clone the repo, from the project root, install dependencies with `pip install -r models/<NLP-task>/requirements.txt`, activate venv, then start server with `uvicorn models.<NLP-task>.main:app --host 0.0.0.0 --port 8000`.
 
 #### With Docker
-Pull the latest build with `docker pull ghcr.io/ericcheung1/wpaas:main`, then start container with `docker run -p 8000:8000 ghcr.io/ericcheung1/wpaas:main`.
+Pull the latest build with `docker pull ghcr.io/ericcheung1/wpaas-<NLP-task>:main`, then start container with `docker run -p 8000:8000 ghcr.io/ericcheung1/wpaas-<NLP-task>:main`.
 
 ## Model(s)
 
-This API serves a fine-tuned DistilBERT model for sentiment classification. Model weights are included in the repository using Git LFS.
+### Sentiment
+
+- Fine-tuned DistilBERT model for sentiment classification
+- Model weights are included in the repository using Git LFS
+- Weights have been converted to .onnx format and FP16 precision 
+- Runs in ONNX runtime for improved loading and inference speeds
 
 ## Client(s)
 
