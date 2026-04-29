@@ -87,8 +87,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.yaml"
-          target: "~/wpaas"
+          source: './infrastructure/'
+          strip_components: 1
+          target: '~/wpaas'
 
       - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@v1.0.3
@@ -98,5 +99,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: | 
             cd ~/wpaas
-            docker compose pull
-            docker compose up -d --remove-orphans
+            docker compose pull sentiment
+            docker compose up -d --remove-orphans sentiment

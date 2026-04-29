@@ -1,0 +1,37 @@
+name: Deploy Nginx as Gateway
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'infrastructure/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout nginx config and docker compose
+        uses: actions/checkout@v4
+
+      - name: Copy config and compose to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: './infrastructure'
+          strip_components: 1
+          target: '~/wpaas'
+      
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/wpaas
+            docker compose pull nginx
+            docker compose up -d --remove-orphans nginx

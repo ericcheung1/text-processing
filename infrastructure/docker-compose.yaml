@@ -1,0 +1,15 @@
+services:
+  sentiment:
+    image: ghcr.io/ericcheung1/wpaas-sentiment:main
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - sentiment
