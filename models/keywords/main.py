@@ -20,7 +20,7 @@ kw_extractor = yake.KeywordExtractor(
 def ping():
     return {"message": "service ok"}
 
-@app.post("/keywords")
+@app.post("/")
 def keywords(input_payload: payload):  
 
     processed_inputs = process_inputs(input_payload)
