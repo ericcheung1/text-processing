@@ -4,6 +4,12 @@ services:
     expose:
       - "8000"
     restart: unless-stopped
+  
+  keywords:
+    image: ghcr.io/ericcheung1/wpaas-keywords:main
+    expose:
+      - "8000" 
+    restart: unless-stopped
  
   caddy:
     image: caddy:latest
@@ -16,6 +22,7 @@ services:
       - caddy_config:/config
     depends_on:
       - sentiment
+      - keywords
     restart: unless-stopped
 
 volumes:

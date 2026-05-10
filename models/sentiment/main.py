@@ -21,12 +21,12 @@ model_session = ort.InferenceSession(distilbert_onnx, providers=["CPUExecutionPr
 app = FastAPI()
 
 
-@app.get("/healthcheck", status_code=status.HTTP_201_CREATED)
+@app.get("/health", status_code=status.HTTP_201_CREATED)
 def ping():
-    return {"message": "service healthy"}
+    return {"message": "service ok"}
 
 
-@app.post("/sentiment")
+@app.post("/")
 def process_sentiment(input_payload: payload):
 
     inputs, ids = process_inputs(input_payload)
