@@ -16,11 +16,11 @@ kw_extractor = yake.KeywordExtractor(
     features=None,         # custom features
 )
 
-@app.get("/health", status_code=status.HTTP_201_CREATED)
+@app.get("/keywords/health", status_code=status.HTTP_201_CREATED)
 def ping():
     return {"message": "service ok"}
 
-@app.post("/")
+@app.post("/keywords")
 def keywords(input_payload: payload):  
 
     processed_inputs = process_inputs(input_payload)

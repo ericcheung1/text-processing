@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY common/ ./common/
-COPY models/keywords ./common/keywords/
+COPY models/keywords ./models/keywords/
 
 EXPOSE 8000
 
