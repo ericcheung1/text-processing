@@ -1,10 +1,10 @@
 wpaa-service.online, www.wpaa-service.online {
 
-    handle /keywords/* {
+    handle /keywords* {
         reverse_proxy keywords:8000
     }
     
-    handle /sentiment/* {
+    handle /sentiment* {
         reverse_proxy sentiment:8000
     }
 }
