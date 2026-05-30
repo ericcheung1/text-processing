@@ -4,6 +4,8 @@ from optimum.onnxruntime import ORTModelForSequenceClassification, ORTOptimizer
 from optimum.onnxruntime.configuration import OptimizationConfig
 from transformers import AutoTokenizer
 
+# Script to convert Distilbert to .onnx
+
 model_id = "distilbert-base-uncased-finetuned-sst-2-english"
 save_dir = "./distilbert_fp16_onnx"
 

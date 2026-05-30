@@ -1,20 +1,47 @@
 # Word processing-as-a-service - NLP Inference API
 
-A lightweight, production‑style REST API built with FastAPI for serving natural langauge processing (NLP) models for tasks such as sentiment analysis. The system and models are designed for deployment on constrained environments such as a VPS with 1 GiB of memory. Emphasis of this project is placed on modularity, ease of deployment, and utilizing scalable patterns.
+A lightweight, production‑style REST API built with FastAPI for serving natural language processing (NLP) models for tasks such as sentiment analysis. The system and models are designed for deployment on constrained environments such as a low-memory VPS. This project emphasizes modularity, scalability, and ease of deployment.
 
-This project generalizes my earlier Canucks sentiment analysis work @ [github.com/ericcheung1/canucks-sentiment](https://github.com/ericcheung1/canucks-sentiment), turning from a single Flask app with hardcoded logic into a scalable, multi‑model inference service.
+Currently supported NLP tasks: sentiment analysis, keyword extractions.
 
-## Overview
+This project generalizes my earlier Canucks sentiment analysis work @ [canucks-sentiment](https://github.com/ericcheung1/canucks-sentiment). It breaks the monolithic repo which combined Reddit scraping, sentiment analysis, and a Flask display layer into a dedicated inference API designed to serve multiple clients.
+
+Check out some models/endpoints in action @ [word-processor-dot-com](https://github.com/ericcheung1/word-processor-dot-com).
+
+- [Architecture](#architecture)
+- [Deployment](#deployment)
+- [Example Requests](#example-requests)
+- [Run Locally](#run-locally)
+- [Models](#models)
+
+## Architecture
 
 ![Architecture](docs/wpaas-diagram.png)
 
-Each model/endpoint is isolated to build as its own container image, sharing a common Pydantic schema for consistent input validation. This structure hopes to enable easier deployment, easier extension to new NLP tasks, and minimal resource usage. Model weights are also included and stored with Git LFS to keep dependicies minimal.
+The system is designed as a collection of isolated inference services to keep models modular and independently deployable.
 
-## Example Request
+- Service-per-model design: each NLP task runs as its own FastAPI app
+- Shared schema layer: common Pydantic models ensure consistent input validation across services
+- Containerized services: each endpoint builds into its own Docker image
+- Extensible structure: new NLP tasks can be added without modifying existing services
 
-### Sentiment
+This structure prioritizes modularity and makes it easier to scale, swap, or deploy models independently.
 
-- POST /sentiment
+## Deployment
+
+The system is currently deployed on a single low-memory VPS using the following:
+
+- CI/CD: GitHub Actions builds and deploys container images
+- Orchestration: Docker Compose manages the multi-service setup
+- Reverse proxy: Caddy handles HTTPS and request routing
+
+This setup keeps infrastructure simple while still following production-style deployment patterns.
+
+## Example Requests
+
+### Input
+
+Input payloads are consistant across all models since they share a common Pydantic schema.
 
 ```
 Request: # Can also be sent without text_id field
@@ -31,9 +58,12 @@ Request: # Can also be sent without text_id field
     }
   ]
 }
+```
 
-Response: 
+### Output
 
+- POST /sentiment
+```
 {
   "sentiment": [
     {
@@ -55,30 +85,65 @@ Response:
   ]
 }
 ```
- Note: first index of the `sentiment_confidence` array is confidence of the text having negative sentiment and second index is confidence of text having positive sentiment
+ Note: The first element of the `sentiment_confidence` array is the negative sentiment score and second element is the positive sentiment score.
+
+ - POST /keywords
+
+ ```
+{
+  "keywords": [
+    {
+      "text_id": "abc123",
+      "extracted_keywords": [
+        {
+          "keyword": "love eating nachos",
+          "score": 0.016559150827736194
+        },
+        {
+          "keyword": "eating nachos",
+          "score": 0.04940384002065631
+        }
+      ]
+    },
+    {
+      "text_id": "def345",
+      "extracted_keywords": [
+        {
+          "keyword": "hate eating nachos",
+          "score": 0.016559150827736194
+        },
+        {
+          "keyword": "eating nachos",
+          "score": 0.04940384002065631
+        }
+      ]
+    }
+  ]
+}
+ ```
+Note: A lower `score` value means higher relevance.
 
 ## Run Locally
 
-This repository uses Git LFS to store model weights.
-Make sure Git LFS is installed with `git lfs install` before cloning.
+This repository uses Git LFS to store weights for models that contain them. Make sure Git LFS is installed with `git lfs install` before cloning and running the follow model(s):
 
-#### With Source
+- Sentiment
+
+### With Source
 Clone the repo, from the project root, install dependencies with `pip install -r models/<NLP-task>/requirements.txt`, activate venv, then start server with `uvicorn models.<NLP-task>.main:app --host 0.0.0.0 --port 8000`.
 
-#### With Docker
+### With Docker
 Pull the latest build with `docker pull ghcr.io/ericcheung1/wpaas-<NLP-task>:main`, then start container with `docker run -p 8000:8000 ghcr.io/ericcheung1/wpaas-<NLP-task>:main`.
 
 ## Model(s)
 
 ### Sentiment
 
-- Fine-tuned DistilBERT model for sentiment classification
+- [DistilBERT](https://huggingface.co/distilbert/distilbert-base-uncased-finetuned-sst-2-english) for binary POSITIVE/NEGATIVE sentiment classification
 - Model weights are included in the repository using Git LFS
-- Weights have been converted to .onnx format and FP16 precision 
-- Runs in ONNX runtime for improved loading and inference speeds
+- Weights have been converted to .onnx format and FP16 precision for improved loading and inference speeds
 
-## Client(s)
+### Keywords
 
-This API is currently used by the following client service(s):
-
-- Web app: [word-processor-dot-com](https://github.com/ericcheung1/word-processor-dot-com)
+- [YAKE](https://github.com/INESCTEC/yake) a lightweight unsupervised automatic keyword extraction method
+- Non-ML uses text statistical features (like term frequency, word co-occurrence, word position) to calculate a score for individual words
